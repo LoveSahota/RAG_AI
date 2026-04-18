@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AnswerAI UI</title>
+  <link rel="icon" href="favicon.ico">
   <style>
     :root {
       --bg: #212121;
@@ -32,6 +33,20 @@
       font: inherit;
     }
 
+    button {
+  background: linear-gradient(135deg, #2f2f2f, #1f1f1f);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 8px 14px;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #3a3a3a;
+  transform: translateY(-1px);
+}
+
     .hidden { display: none !important; }
 
     .app {
@@ -49,6 +64,12 @@
         #111111;
       padding: 24px;
     }
+
+    .logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
     .login-card {
       width: 100%;
@@ -183,19 +204,41 @@
     }
 
     .main-screen {
-      display: flex;
-      grid-template-columns: 280px 1fr;
-      height: 100vh;
-      overflow: hidden;
-    }
+  display: flex;
+  height: 100vh;
+  background: radial-gradient(circle at top, #1f1f1f, #0f0f0f);
+}
 
     .sidebar {
-      background: #171717;
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
+  width: 280px;
+  min-width: 280px;
+  transition: width 0.3s ease;
+  
+  background: rgba(23, 23, 23, 0.75);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255,255,255,0.05);
+
+  display: flex;
+  flex-direction: column;
+
+  transition: all 0.3s ease;
+}
+
+.sidebar.compact {
+  width: 80px;
+  min-width: 80px;
+}
+
+    .sidebar.compact .chat-item:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 80px;
+  background: #222;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
 
     .sidebar-top {
       padding: 14px;
@@ -323,11 +366,13 @@
     .account-meta small { color: var(--muted); }
 
     .content {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      background: #212121;
-    }
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: #212121;
+}
 
     .topbar {
       height: 60px;
@@ -361,17 +406,21 @@
     }
 
     .chat-area {
-  height: 100%;          /* ✅ important */
-  overflow-y: auto;      /* ✅ enables scroll */
-  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 20px 120px;
   display: flex;
   flex-direction: column;
+  scroll-behavior: smooth;
+
+  transition: all 0.3s ease;
 }
 
     .chat-wrap {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
 
     .welcome {
       min-height: calc(100vh - 180px);
@@ -388,12 +437,14 @@
     }
 
     .message {
-      display: grid;
-      grid-template-columns: 40px 1fr;
-      gap: 14px;
-      padding: 18px 0;
-      border-bottom: 1px solid rgba(255,255,255,.04);
-    }
+  max-width: 70%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+  font-size: 14px;
+  animation: fadeInUp 0.25s ease;
+}
 
     .message-avatar {
       width: 40px;
@@ -411,6 +462,17 @@
     .message.assistant .message-avatar {
       background: linear-gradient(135deg, #10a37f, #0a7c60);
     }
+
+    .message.user {
+  align-self: flex-end;
+  background: #2a2a2a;
+}
+
+.message.assistant {
+  align-self: flex-start;
+  background: #1f1f1f;
+  border: 1px solid rgba(255,255,255,0.05);
+}
 
     .message-header {
       font-size: .92rem;
@@ -622,6 +684,65 @@
       display: none;
     }
 
+    .chat-input {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 60%;
+  max-width: 900px;
+
+  display: flex;
+  gap: 10px;
+
+  background: rgba(30,30,30,0.8);
+  backdrop-filter: blur(15px);
+
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 12px;
+
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+    .typing {
+  display: flex;
+  gap: 6px;
+}
+
+.typing span {
+  width: 6px;
+  height: 6px;
+  background: #aaa;
+  border-radius: 50%;
+  animation: blink 1.4s infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+
+    @keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
     @media (max-width: 900px) {
       .main-screen {
         grid-template-columns: 1fr;
@@ -668,7 +789,9 @@
     <section id="loginScreen" class="login-screen">
       <div class="login-card">
         <div class="brand">
-          <div class="brand-badge">A</div>
+          <div class="logo">
+  <img src="logo.png" alt="AnswerAI Logo" style="width:60px; height:60px; object-fit:contain;">
+</div>
           <div>
             <h1>AnswerAI</h1>
             <p>interface for your AI assistant</p>
@@ -696,7 +819,7 @@
         <form id="signupForm" class="form hidden">
           <div class="field">
             <label>Full name</label>
-            <input type="text" id="signupName" placeholder="Loveleen Sahota" required />
+            <input type="text" id="signupName" placeholder="Enter your name" required />
           </div>
           <div class="field">
             <label>Email</label>
@@ -749,7 +872,7 @@
             <div id="chatTitle" class="chat-title">New chat</div>
           </div>
           <div class="topbar-right">
-            <button id="renameChatBtn" class="secondary-btn">Rename</button>
+            
             <button id="settingsBtn" class="secondary-btn">Settings</button>
           </div>
         </div>
@@ -774,7 +897,7 @@
                 <div class="composer-left">
                   <button id="attachBtn" class="secondary-btn" type="button">Attach</button>
                   <input type="file" id="pdfInput" accept=".pdf" style="display: none;" />
-                  <button id="micBtn" class="secondary-btn" type="button">Voice</button>
+                  
                 </div>
                 <div class="composer-right">
                   <button id="sendBtn" class="send-btn" type="button">Send</button>
@@ -821,12 +944,12 @@
           <p>View and update your profile details.</p>
           <div class="settings-section">
             <div class="profile-row">
-              <div>
-                <strong id="profileName">User</strong>
-                <small id="profileEmail">user@example.com</small>
-              </div>
-              <button id="logoutBtn" class="secondary-btn">Logout</button>
-            </div>
+  <div>
+    <strong id="profileName">User</strong>
+    <small id="profileEmail">user@example.com</small>
+  </div>
+  <button id="logoutBtn" class="secondary-btn">Logout</button>
+</div>
             <div class="profile-row">
               <div>
                 <strong>Delete all chats</strong>
@@ -869,7 +992,8 @@
       settings: {
         showWelcome: true,
         saveLocally: true,
-        compactSidebar: false,
+        compactSidebar: true,
+        isSidebarCompact: true
       }
     };
 
@@ -897,6 +1021,15 @@
     const attachBtn = $('attachBtn');
     //const messages = document.getElementById("messages");
 
+    const toggle = document.getElementById("compactToggle");
+
+if (toggle) {
+  toggle.addEventListener("change", () => {
+    state.isSidebarCompact = toggle.checked;
+    applySidebarState();
+  });
+}
+
     function scrollToBottom() {
   const chatArea = document.querySelector(".chat-area");
   if (chatArea) {
@@ -904,9 +1037,70 @@
   }
 }
 
+function setChatTitle(title) {
+  if (chatTitle) {
+    chatTitle.innerText = title || "New chat";
+  }
+}
+
+function showWelcomeScreen() {
+  welcomeState.classList.remove("hidden");
+  messages.innerHTML = "";
+  setChatTitle("New chat");
+}
+
+function showChatScreen() {
+  welcomeState.classList.add("hidden");
+}
+
+function setActiveChatButton(chatId) {
+  document.querySelectorAll(".chat-item").forEach(btn => {
+    const btnChatId = Number(btn.dataset.chatId);
+    btn.classList.toggle("active", btnChatId === Number(chatId));
+  });
+}
+
+function createMessageElement(role, content, isLoading = false) {
+  const div = document.createElement("div");
+  div.className = "message " + role;
+
+  let body = content;
+
+  if (isLoading) {
+    body = `
+      <div class="typing">
+        <span></span><span></span><span></span>
+      </div>
+    `;
+  }
+
+  div.innerHTML = `
+    <div class="message-body">${body}</div>
+  `;
+
+  return div;
+}
+
+function getCurrentChatTitleFromSidebar(chatId) {
+  const activeBtn = [...document.querySelectorAll(".chat-item")].find(
+    btn => Number(btn.dataset.chatId) === Number(chatId)
+  );
+  return activeBtn ? activeBtn.textContent.trim() : "New chat";
+}
+
     function uid() {
       return Math.random().toString(36).slice(2, 10);
     }
+
+    function applySidebarState() {
+  const sidebar = document.querySelector(".sidebar");
+
+  if (state.isSidebarCompact) {
+    sidebar.classList.add("compact");
+  } else {
+    sidebar.classList.remove("compact");
+  }
+}
 
 
     function getChatsKey(email) {
@@ -922,37 +1116,53 @@
     }
 
     function renderAccount() {
-      if (!state.currentUser) return;
-      const initials = (state.currentUser.name || state.currentUser.email || 'U').trim().charAt(0).toUpperCase();
-      $('avatarBadge').textContent = initials;
-      $('accountName').textContent = state.currentUser.name || 'User';
-      $('accountEmail').textContent = state.currentUser.email;
-      $('profileName').textContent = state.currentUser.name || 'User';
-      $('profileEmail').textContent = state.currentUser.email;
-    }
+  if (!state.currentUser) return;
+
+  const name = state.currentUser.name || "User";
+  const email = state.currentUser.email || "";
+
+  const userNameEl = document.getElementById("userName");
+  const userEmailEl = document.getElementById("userEmail");
+  const profileNameEl = document.getElementById("profileName");
+  const profileEmailEl = document.getElementById("profileEmail");
+  const avatarEl = document.getElementById("avatar");
+
+  if (userNameEl) userNameEl.innerText = name;
+  if (userEmailEl) userEmailEl.innerText = email;
+  if (profileNameEl) profileNameEl.innerText = name;
+  if (profileEmailEl) profileEmailEl.innerText = email;
+  if (avatarEl) avatarEl.innerText = name.charAt(0).toUpperCase();
+}
 
     
     async function createChat() {
-  const title = "New Chat";
+  try {
+    const res = await fetch("http://127.0.0.1:8000/create_chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        user_id: state.currentUser.id,
+        title: "New Chat"
+      })
+    });
 
-  const res = await fetch("http://127.0.0.1:8000/create_chat", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      user_id: state.currentUser.id,
-      title: title
-    })
-  });
+    const chat = await res.json();
 
-  const chat = await res.json();
+    state.currentChatId = chat.id;
 
-  state.currentChatId = chat.id;
+    await loadChats(chat.id);
 
-  await loadChats();
-  await loadMessages(chat.id);
+    showWelcomeScreen();
+    setChatTitle(chat.title || "New chat");
+    showChatScreen();
+    messages.innerHTML = "";
+    welcomeState.classList.remove("hidden");
+  } catch (error) {
+    console.error("Create chat failed:", error);
+    alert("Failed to create chat");
+  }
 }
-
-async function loadChats() {
+async function loadChats(preferredChatId = null) {
   try {
     const res = await fetch(`http://127.0.0.1:8000/get_chats/${state.currentUser.id}`);
     const chats = await res.json();
@@ -960,63 +1170,73 @@ async function loadChats() {
     chatList.innerHTML = "";
 
     if (!chats || chats.length === 0) {
+      state.currentChatId = null;
       const empty = document.createElement("div");
       empty.innerText = "No chats yet. Click 'New Chat'";
       empty.style.color = "gray";
+      empty.style.padding = "10px";
       chatList.appendChild(empty);
-
-      welcomeState.classList.remove("hidden");
-      messages.innerHTML = "";
+      showWelcomeScreen();
       return;
     }
 
-    // ✅ NORMAL LOOP (NOT forEach)
-    for (let i = 0; i < chats.length; i++) {
-      const chat = chats[i];
-
+    chats.forEach(chat => {
       const btn = document.createElement("button");
       btn.className = "chat-item";
       btn.textContent = chat.title;
+      btn.dataset.chatId = chat.id;
+      btn.setAttribute("data-title", chat.title);
 
-      // CLICK → LOAD CHAT
       btn.onclick = async () => {
         state.currentChatId = chat.id;
-
-        document.querySelectorAll(".chat-item").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
+        setActiveChatButton(chat.id);
         await loadMessages(chat.id);
       };
 
-      // RIGHT CLICK → RENAME
       btn.oncontextmenu = async (e) => {
         e.preventDefault();
 
         const newName = prompt("Rename chat:", chat.title);
-        if (!newName) return;
+        if (!newName || !newName.trim()) return;
 
-        const res = await fetch("http://127.0.0.1:8000/rename_chat", {
-          method: "PUT",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            chat_id: chat.id,
-            new_title: newName
-          })
-        });
+        try {
+          await fetch("http://127.0.0.1:8000/rename_chat", {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              chat_id: chat.id,
+              new_title: newName.trim()
+            })
+          });
 
-        await loadChats();
+          await loadChats(chat.id);
+          setChatTitle(newName.trim());
+        } catch (err) {
+          console.error("Rename failed:", err);
+          alert("Rename failed");
+        }
       };
 
       chatList.appendChild(btn);
+    });
+
+    let chatToOpen = preferredChatId;
+
+    if (!chatToOpen) {
+      chatToOpen = state.currentChatId || chats[0].id;
     }
 
-    // ✅ AUTO LOAD FIRST CHAT (OUTSIDE LOOP)
-    state.currentChatId = chats[0].id;
+    state.currentChatId = chatToOpen;
+    setActiveChatButton(chatToOpen);
 
-    const firstBtn = chatList.querySelector(".chat-item");
-    if (firstBtn) firstBtn.classList.add("active");
-
-    await loadMessages(chats[0].id);
+    const exists = chats.some(c => Number(c.id) === Number(chatToOpen));
+    if (exists) {
+      await loadMessages(chatToOpen);
+    } else {
+      state.currentChatId = chats[0].id;
+      setActiveChatButton(chats[0].id);
+      await loadMessages(chats[0].id);
+    }
 
   } catch (error) {
     console.error("Error loading chats:", error);
@@ -1024,28 +1244,53 @@ async function loadChats() {
   }
 }
 
-async function loadMessages(chatId) {
-  const res = await fetch(`http://127.0.0.1:8000/get_messages/${chatId}`);
-  const msgs = await res.json();
+async function updateCurrentChatName() {
+  if (!state.currentUser || !state.currentChatId) return;
 
-  messages.innerHTML = "";
+  const res = await fetch(`http://127.0.0.1:8000/get_chats/${state.currentUser.id}`);
+  const chats = await res.json();
 
-  msgs.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = "message " + msg.role;
+  const currentChat = chats.find(c => Number(c.id) === Number(state.currentChatId));
+  if (!currentChat) return;
 
-    div.innerHTML = `
-      <div class="message-header">
-        ${msg.role === 'user' ? 'You' : 'AnswerAI'}
-      </div>
-      <div class="message-body">${msg.content}</div>
-    `;
+  setChatTitle(currentChat.title);
 
-    messages.appendChild(div);
+  document.querySelectorAll(".chat-item").forEach(btn => {
+    if (Number(btn.dataset.chatId) === Number(state.currentChatId)) {
+      btn.textContent = currentChat.title;
+      btn.setAttribute("data-title", currentChat.title);
+    }
   });
+}
 
-  welcomeState.classList.toggle("hidden", msgs.length > 0);
-scrollToBottom();
+async function loadMessages(chatId) {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/get_messages/${chatId}`);
+    const msgs = await res.json();
+
+    messages.innerHTML = "";
+
+    if (!msgs || msgs.length === 0) {
+      welcomeState.classList.remove("hidden");
+      setChatTitle(getCurrentChatTitleFromSidebar(chatId));
+      return;
+    }
+ 
+    smoothSwitchChat();
+    showChatScreen();
+    setChatTitle(getCurrentChatTitleFromSidebar(chatId));
+    
+
+    msgs.forEach(msg => {
+      const div = createMessageElement(msg.role, msg.content, false);
+      messages.appendChild(div);
+    });
+
+    scrollToBottom();
+  } catch (error) {
+    console.error("Failed to load messages:", error);
+    alert("Failed to load messages");
+  }
 }
 
     function getCurrentChat() {
@@ -1060,28 +1305,29 @@ scrollToBottom();
 
     async function sendMessage() {
   const value = messageInput.value.trim();
-if (!value) return;
-
-// ✅ HIDE WELCOME SCREEN
-welcomeState.classList.add("hidden");
-
-  console.log("Sending:", value);
-
-  // ✅ Ensure chat exists
-  if (!state.currentChatId) {
-    await createChat();
-  }
-
-  // ✅ SHOW USER MESSAGE INSTANTLY
-  const userDiv = document.createElement("div");
-  userDiv.innerText = "You: " + value;
-  userDiv.style.color = "white";
-  messages.appendChild(userDiv);
-  scrollToBottom();
-
-  messageInput.value = "";
+  if (!value) return;
 
   try {
+    if (!state.currentChatId) {
+      await createChat();
+    }
+
+    showChatScreen();
+
+    const currentValue = value;
+    messageInput.value = "";
+    autoResizeTextarea();
+
+    const userDiv = createMessageElement("user", currentValue, false);
+    messages.appendChild(userDiv);
+
+    const loadingDiv = createMessageElement("assistant", "", true);
+    loadingDiv.id = "tempLoadingMessage";
+    messages.appendChild(loadingDiv);
+
+    setChatTitle("Loading...");
+    scrollToBottom();
+
     const res = await fetch("http://127.0.0.1:8000/send_message", {
       method: "POST",
       headers: {
@@ -1089,27 +1335,39 @@ welcomeState.classList.add("hidden");
       },
       body: JSON.stringify({
         chat_id: state.currentChatId,
-        message: value
+        message: currentValue
       })
     });
 
     const data = await res.json();
-    console.log("Response:", data);
 
-    // ✅ SHOW AI RESPONSE
-    const aiDiv = document.createElement("div");
+    const temp = document.getElementById("tempLoadingMessage");
+    if (temp) temp.remove();
+
     const reply = data.response || data.answer || data.reply || "No response";
-    aiDiv.innerText = "AI: " + reply;
-    aiDiv.style.color = "lightgreen";
+    const aiDiv = createMessageElement("assistant", reply, false);
     messages.appendChild(aiDiv);
+
+    await updateCurrentChatName();
     scrollToBottom();
 
-    
-
   } catch (err) {
-    console.error(err);
+    console.error("Send message error:", err);
+    const temp = document.getElementById("tempLoadingMessage");
+    if (temp) {
+      temp.querySelector(".message-body").innerText = "Failed to get response.";
+    }
+    setChatTitle(getCurrentChatTitleFromSidebar(state.currentChatId));
     alert("Error: " + err.message);
   }
+}
+
+function smoothSwitchChat() {
+  messages.style.opacity = "0";
+
+  setTimeout(() => {
+    messages.style.opacity = "1";
+  }, 120);
 }
 
     function autoResizeTextarea() {
@@ -1139,8 +1397,7 @@ welcomeState.classList.add("hidden");
   mainScreen.classList.remove('hidden');
 
   renderAccount();
-
-  loadChats(); // ✅ ONLY THIS
+  loadChats();
 }
 
     function logout() {
@@ -1150,6 +1407,10 @@ welcomeState.classList.add("hidden");
       mainScreen.classList.add('hidden');
       settingsOverlay.classList.remove('open');
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+  applySidebarState();
+});
 
     tabButtons.forEach(btn => {
       btn.addEventListener('click', () => setAuthMode(btn.dataset.tab));
@@ -1161,41 +1422,32 @@ welcomeState.classList.add("hidden");
   const email = $('loginEmail').value.trim();
   const password = $('loginPassword').value.trim();
 
-  const res = await fetch("http://127.0.0.1:8000/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ email, password })
-  });
+  try {
+    const res = await fetch("http://127.0.0.1:8000/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ email, password })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
+    console.log("Login data:", data);
 
-  if (data.error) {
-    alert(data.error);
-    return;
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+
+    state.currentUser = data;
+    openMainApp(data);
+
+    setTimeout(() => {
+      applySidebarState();
+    }, 0);
+
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Login failed");
   }
-
-  state.currentUser = data;
-
-
-  loginScreen.classList.add("hidden");
-  mainScreen.classList.remove("hidden");
-
-  // AFTER switching screens
-loginScreen.classList.add("hidden");
-mainScreen.classList.remove("hidden");
-
-// THEN set user info
-const userNameEl = document.getElementById("userName");
-const userEmailEl = document.getElementById("userEmail");
-const avatarEl = document.getElementById("avatar");
-
-if (userNameEl && userEmailEl && avatarEl) {
-  userNameEl.innerText = data.name;
-  userEmailEl.innerText = data.email;
-  avatarEl.innerText = data.name.charAt(0).toUpperCase();
-}
-
-  await loadChats();
 });
 
     signupForm.addEventListener('submit', async (e) => {
@@ -1233,7 +1485,14 @@ if (userNameEl && userEmailEl && avatarEl) {
       }
     });
 
-    $('chatSearch').addEventListener('input', (e) => renderChatList(e.target.value));
+    $('chatSearch').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+
+  document.querySelectorAll(".chat-item").forEach(btn => {
+    const visible = btn.textContent.toLowerCase().includes(q);
+    btn.style.display = visible ? "" : "none";
+  });
+});
 
     settingsBtn.addEventListener('click', () => settingsOverlay.classList.add('open'));
     accountBtn.addEventListener('click', () => settingsOverlay.classList.add('open'));
@@ -1283,19 +1542,23 @@ if (userNameEl && userEmailEl && avatarEl) {
   }
 });
 
-    renameChatBtn.addEventListener('click', () => {
-      const chat = getCurrentChat();
-      if (!chat) return;
-      const title = prompt('Rename chat', chat.title);
-      if (!title || !title.trim()) return;
-      updateCurrentChat(c => { c.title = title.trim(); });
-    });
 
+    
     $('welcomeSwitch').addEventListener('click', (e) => {
-      e.currentTarget.classList.toggle('on');
-      state.settings.showWelcome = e.currentTarget.classList.contains('on');
-      renderCurrentChat();
-    });
+  e.currentTarget.classList.toggle('on');
+  state.settings.showWelcome = e.currentTarget.classList.contains('on');
+
+  if (!state.currentChatId) {
+    showWelcomeScreen();
+    return;
+  }
+
+  if (state.settings.showWelcome && messages.children.length === 0) {
+    welcomeState.classList.remove("hidden");
+  } else {
+    welcomeState.classList.add("hidden");
+  }
+});
 
     $('storageSwitch').addEventListener('click', (e) => {
       e.currentTarget.classList.toggle('on');
@@ -1312,7 +1575,7 @@ if (userNameEl && userEmailEl && avatarEl) {
 
     mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
 
-    $('micBtn').addEventListener('click', () => alert('Connect this button to your voice input feature.'));
+
 
 
 // Get elements
