@@ -13,6 +13,9 @@ from rag_pipeline import retrieve_relevant_chunks, build_rag_prompt, ask_ai
 
 models.Base.metadata.create_all(bind=engine)
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 app.add_middleware(
@@ -77,15 +80,24 @@ def signup(data: SignupRequest, db: Session = Depends(get_db)):
 
 @app.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(
-        models.User.email == data.email,
-        models.User.password == data.password
-    ).first()
+    try:
+        user = db.query(models.User).filter(models.User.email == data.email).first()
 
-    if not user:
-        return {"error": "Invalid credentials"}
+        if not user:
+            return {"error": "User not found"}
 
-    return {"id": user.id, "name": user.name, "email": user.email}
+        if user.password != data.password:
+            return {"error": "Invalid password"}
+
+        return {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+        }
+
+    except Exception as e:
+        print("LOGIN ERROR:", str(e))  # 👈 VERY IMPORTANT
+        return {"error": str(e)}
 
 
 @app.post("/create_chat")
@@ -179,8 +191,11 @@ def send_message(data: MessageRequest, db: Session = Depends(get_db)):
     history = [{"role": m.role, "content": m.content} for m in history_rows]
 
     chunk_rows = db.query(models.DocumentChunk).filter(
-        models.DocumentChunk.chat_id == data.chat_id
-    ).all()
+    models.DocumentChunk.chat_id == data.chat_id
+    ).order_by(models.DocumentChunk.chunk_index).all()
+
+    print("Chat ID:", data.chat_id)
+    print("Chunks fetched:", len(chunk_rows))
 
     chunks = [{"content": c.content} for c in chunk_rows]
 
@@ -188,7 +203,7 @@ def send_message(data: MessageRequest, db: Session = Depends(get_db)):
         ai_response = "No PDF has been uploaded for this chat yet."
     else:
         relevant_chunks = retrieve_relevant_chunks(data.message, chunks, top_k=4)
-        useful_chunks = [c for c in relevant_chunks if c["score"] > 0]
+        useful_chunks = [c for c in relevant_chunks if c.get("score", 0) > 0]
 
         if not useful_chunks:
             ai_response = "The answer was not found in the uploaded document."
@@ -205,10 +220,33 @@ def send_message(data: MessageRequest, db: Session = Depends(get_db)):
         role="assistant",
         content=ai_response
     )
+
     db.add(ai_msg)
     db.commit()
 
+    # ✅ AUTO RENAME CHAT (only first question)
+    chat = db.query(models.Chat).filter(models.Chat.id == data.chat_id).first()
+
+    if chat and chat.title == "New Chat":
+        
+        # Get document name
+        doc = db.query(models.Document).filter(
+            models.Document.chat_id == data.chat_id
+        ).first()
+
+        doc_name = doc.filename if doc else "Chat"
+
+        # Take first few words of question
+        short_question = " ".join(data.message.split()[:5])
+
+        # Create title
+        new_title = f"{doc_name} - {short_question}"
+
+        chat.title = new_title[:50]  # limit length
+        db.commit()
+
     return {"response": ai_response}
+
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -264,3 +302,14 @@ def rename_chat(data: RenameChatRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Chat renamed successfully"}
+
+from fastapi import UploadFile, File, Form
+import os
+
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
